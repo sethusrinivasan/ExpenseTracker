@@ -1,6 +1,7 @@
 import { getExpenses } from "@/actions/expenses"
 import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseList } from "@/components/expense-list"
+import { LocationScenery } from "@/components/location-scenery"
 
 export default async function Home() {
   const expenses = await getExpenses()
@@ -20,6 +21,10 @@ export default async function Home() {
           <div className="lg:col-span-2">
             <ExpenseList expenses={expenses} />
           </div>
+        </div>
+
+        <div className="mt-8">
+          <LocationScenery />
         </div>
       </div>
     </div>
