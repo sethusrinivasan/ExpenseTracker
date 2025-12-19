@@ -56,3 +56,23 @@ export async function deleteExpense(id: number) {
     return { success: false, error: "Failed to delete expense" }
   }
 }
+
+export async function getLatestExpenseLocation() {
+  try {
+    const result = await sql`
+      SELECT ip_address FROM expenses
+      WHERE ip_address IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT 1
+    `
+
+    if (result.length === 0) {
+      return null
+    }
+
+    return result[0].ip_address
+  } catch (error) {
+    console.error("[v0] Error fetching latest expense location:", error)
+    return null
+  }
+}
