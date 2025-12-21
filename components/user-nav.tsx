@@ -1,4 +1,4 @@
-import { auth, signOut } from "@/auth"
+import { getSession } from "@/lib/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,10 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, User } from "lucide-react"
+import { User } from "lucide-react"
+import { SignOutButton } from "./sign-out-button"
 
 export async function UserNav() {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user) {
     return null
@@ -50,19 +51,7 @@ export async function UserNav() {
           <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form
-          action={async () => {
-            "use server"
-            await signOut({ redirectTo: "/auth/signin" })
-          }}
-        >
-          <button type="submit" className="w-full">
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign out</span>
-            </DropdownMenuItem>
-          </button>
-        </form>
+        <SignOutButton />
       </DropdownMenuContent>
     </DropdownMenu>
   )
