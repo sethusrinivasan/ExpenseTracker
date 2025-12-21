@@ -1,97 +1,61 @@
-"use client"
-
-import { useState } from "react"
-import { Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { getUserExpenses } from "@/app/actions/expense-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { deleteExpense } from "@/actions/expenses"
-import { useToast } from "@/hooks/use-toast"
-import type { Expense } from "@/lib/types"
+import { format } from "date-fns"
+import { Calendar, DollarSign } from "lucide-react"
+import { ExpenseActions } from "./expense-actions"
 
-interface ExpenseListProps {
-  expenses: Expense[]
-}
+export async function ExpenseList() {
+  const { expenses, error } = await getUserExpenses()
 
-export function ExpenseList({ expenses }: ExpenseListProps) {
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-  const { toast } = useToast()
-
-  async function handleDelete(id: number) {
-    setDeletingId(id)
-    const result = await deleteExpense(id)
-
-    if (result.success) {
-      toast({
-        title: "Expense deleted",
-        description: "The expense has been removed.",
-      })
-    } else {
-      toast({
-        title: "Error",
-        description: result.error || "Failed to delete expense",
-        variant: "destructive",
-      })
-    }
-
-    setDeletingId(null)
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="py-10 text-center text-muted-foreground">{error}</CardContent>
+      </Card>
+    )
   }
 
-  const total = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0)
+  if (expenses.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-10 text-center text-muted-foreground">
+          No expenses yet. Start by adding your first expense!
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Expenses</CardTitle>
-        <CardDescription>
-          Total: <span className="font-bold text-lg">${total.toFixed(2)}</span>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {expenses.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No expenses recorded yet. Add your first expense above.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {expenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell className="whitespace-nowrap">{new Date(expense.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{expense.description}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{expense.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">${Number(expense.amount).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(expense.id)}
-                        disabled={deletingId === expense.id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete expense</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      {expenses.map((expense) => (
+        <Card key={expense.id}>
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-lg">{expense.category}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-xs">
+                  <Calendar className="h-3 w-3" />
+                  {format(new Date(expense.date), "MMM dd, yyyy")}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-2xl font-bold">
+                    <DollarSign className="h-5 w-5" />
+                    {Number.parseFloat(expense.amount).toFixed(2)}
+                  </div>
+                </div>
+                <ExpenseActions expense={expense} />
+              </div>
+            </div>
+          </CardHeader>
+          {expense.description && (
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{expense.description}</p>
+            </CardContent>
+          )}
+        </Card>
+      ))}
+    </div>
   )
 }
