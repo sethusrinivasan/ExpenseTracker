@@ -1,6 +1,6 @@
 "use server"
 
-import { auth } from "@/auth"
+import { getSession } from "@/lib/auth"
 import { createExpense, deleteExpense, getExpensesByUserId, updateExpense } from "@/lib/expenses"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -13,7 +13,7 @@ const expenseSchema = z.object({
 })
 
 export async function addExpense(formData: FormData) {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user?.id) {
     return { error: "Unauthorized" }
@@ -42,7 +42,7 @@ export async function addExpense(formData: FormData) {
 }
 
 export async function editExpense(expenseId: string, formData: FormData) {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user?.id) {
     return { error: "Unauthorized" }
@@ -75,7 +75,7 @@ export async function editExpense(expenseId: string, formData: FormData) {
 }
 
 export async function removeExpense(expenseId: string) {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user?.id) {
     return { error: "Unauthorized" }
@@ -97,7 +97,7 @@ export async function removeExpense(expenseId: string) {
 }
 
 export async function getUserExpenses() {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user?.id) {
     return { error: "Unauthorized", expenses: [] }

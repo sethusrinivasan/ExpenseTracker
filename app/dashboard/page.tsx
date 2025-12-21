@@ -1,4 +1,4 @@
-import { auth } from "@/auth"
+import { getSession } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserNav } from "@/components/user-nav"
@@ -8,7 +8,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 export default async function DashboardPage() {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user?.id) {
     redirect("/auth/signin")

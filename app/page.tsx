@@ -1,11 +1,11 @@
-import { auth } from "@/auth"
+import { getSession } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Shield, TrendingUp, Wallet } from "lucide-react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
 export default async function HomePage() {
-  const session = await auth()
+  const session = await getSession()
 
   if (session?.user) {
     redirect("/dashboard")
