@@ -2,12 +2,6 @@ import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { neon } from "@neondatabase/serverless"
 
-console.log("[v0] Initializing auth config")
-console.log("[v0] DATABASE_URL exists:", !!process.env.DATABASE_URL)
-console.log("[v0] GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID)
-
-const sql = neon(process.env.DATABASE_URL!)
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -17,11 +11,11 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      console.log("[v0] SignIn callback triggered", { email: user.email })
-
       if (!user.email) return false
 
       try {
+        const sql = getSql()
+
         const existingUser = await sql`
           SELECT id FROM users WHERE email = ${user.email}
         `
@@ -57,18 +51,27 @@ export const authOptions: NextAuthOptions = {
         return false
       }
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.picture = user.image
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.picture as string
       }
       return session
     },
+  },
+  session: {
+    strategy: "jwt",
   },
   pages: {
     signIn: "/auth/signin",
@@ -77,4 +80,9 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET,
 }
 
-console.log("[v0] Auth config created successfully")
+const getSql = () => {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is not set")
+  }
+  return neon(process.env.DATABASE_URL)
+}
