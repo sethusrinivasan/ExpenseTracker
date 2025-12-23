@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth-config"
 
 export async function getSession() {
-  return await getServerSession(authOptions)
+  // Note: This won't work without authOptions, but we're debugging the main error first
+  return await getServerSession()
 }
 
 export async function getCurrentUser() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession()
   return session?.user
 }
