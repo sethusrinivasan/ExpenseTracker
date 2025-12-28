@@ -1,87 +1,71 @@
-import { getSession } from "@/lib/auth"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Shield, TrendingUp, Wallet } from "lucide-react"
-import Link from "next/link"
-import { redirect } from "next/navigation"
+"use client"
 
-export default async function HomePage() {
-  const session = await getSession()
+import { useState } from "react"
+import { ExpenseForm } from "@/components/expense-form"
+import { ExpenseList } from "@/components/expense-list"
+import { ExpenseSummary } from "@/components/expense-summary"
+import { ExpenseAnalytics } from "@/components/expense-analytics"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Wallet } from "lucide-react"
 
-  if (session?.user) {
-    redirect("/dashboard")
+export default function Home() {
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const handleExpenseAdded = () => {
+    setRefreshKey((prev) => prev + 1)
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <Wallet className="h-6 w-6" />
-            <span className="text-xl font-bold">ExpenseTracker</span>
-          </div>
-          <Button asChild>
-            <Link href="/auth/signin">Sign In</Link>
-          </Button>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        <section className="container mx-auto px-4 py-24 text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-balance sm:text-6xl">Track Your Expenses with Ease</h1>
-          <p className="mt-6 text-lg text-muted-foreground text-balance max-w-2xl mx-auto">
-            A simple, secure, and powerful expense tracking app. Keep your finances organized and gain insights into
-            your spending habits.
-          </p>
-          <div className="mt-10 flex gap-4 justify-center">
-            <Button asChild size="lg">
-              <Link href="/auth/signin">
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
-
-        <section className="border-t bg-muted/50 py-24">
-          <div className="container mx-auto px-4">
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="flex flex-col items-center text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Shield className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-xl font-semibold">Secure & Private</h3>
-                <p className="mt-2 text-muted-foreground">
-                  Your data is encrypted and isolated. Only you can access your expenses.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-xl font-semibold">Insights & Analytics</h3>
-                <p className="mt-2 text-muted-foreground">
-                  Visualize your spending patterns and make informed financial decisions.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Wallet className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-xl font-semibold">Easy to Use</h3>
-                <p className="mt-2 text-muted-foreground">
-                  Intuitive interface makes tracking expenses quick and effortless.
-                </p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-primary/5">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <header className="mb-10 animate-fade-in">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-3 bg-gradient-to-br from-primary to-primary/80 rounded-2xl shadow-lg shadow-primary/20">
+              <Wallet className="w-7 h-7 text-primary-foreground" />
             </div>
+            <h1 className="text-5xl font-bold tracking-tight text-balance">Expenses</h1>
           </div>
-        </section>
-      </main>
+          <p className="text-muted-foreground text-lg ml-[4.25rem]">Track your spending with ease</p>
+        </header>
 
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2025 ExpenseTracker. All rights reserved.
-        </div>
-      </footer>
+        <Tabs defaultValue="overview" className="space-y-8">
+          <TabsList className="grid w-full max-w-md grid-cols-3 h-12 p-1 bg-secondary/50 backdrop-blur-xl border border-border/50 shadow-sm">
+            <TabsTrigger
+              value="overview"
+              className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-md transition-all duration-300 ease-out"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="add"
+              className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-md transition-all duration-300 ease-out"
+            >
+              Add Expense
+            </TabsTrigger>
+            <TabsTrigger
+              value="analytics"
+              className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-md transition-all duration-300 ease-out"
+            >
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-8 animate-fade-in">
+            <ExpenseSummary key={`summary-${refreshKey}`} />
+            <ExpenseList key={`list-${refreshKey}`} />
+          </TabsContent>
+
+          <TabsContent value="add" className="animate-fade-in">
+            <div className="max-w-2xl mx-auto">
+              <ExpenseForm onExpenseAdded={handleExpenseAdded} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="animate-fade-in">
+            <ExpenseAnalytics key={`analytics-${refreshKey}`} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }
