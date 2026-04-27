@@ -4,6 +4,14 @@ A personal expense tracker — log spending, view summaries, and explore analyti
 
 **[Live Demo →](https://v0-expense-tracking-app-gilt.vercel.app/)**
 
+| Overview | Add Expense |
+|---|---|
+| ![Overview](docs/screenshots/01-overview.png) | ![Add Expense](docs/screenshots/02-add-expense.png) |
+
+| Analytics | Tests |
+|---|---|
+| ![Analytics](docs/screenshots/03-analytics.png) | ![Tests](docs/screenshots/04-tests.png) |
+
 <a href="https://vercel.com/new/clone?repository-url=https://github.com/sethusrinivasan/ExpenseTracker&env=DATABASE_URL&envDescription=Neon%20Postgres%20connection%20string.%20Get%20it%20from%20https://console.neon.tech&envLink=https://neon.tech"><img src="https://vercel.com/button" alt="Deploy with Vercel" height="44" /></a>&nbsp;
 <a href="https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/sethusrinivasan/ExpenseTracker"><img src="https://img.shields.io/badge/Deploy%20to%20AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Deploy to AWS" height="44" /></a>&nbsp;
 
