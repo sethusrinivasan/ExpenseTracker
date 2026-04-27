@@ -48,7 +48,10 @@ export function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
         body: JSON.stringify(formData),
       })
 
-      if (!response.ok) throw new Error("Failed to add expense")
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error ?? "Failed to add expense")
+      }
 
       toast({
         title: "Success!",
@@ -66,8 +69,8 @@ export function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
       onExpenseAdded?.()
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to add expense. Please try again.",
+        title: "Could not save expense",
+        description: error instanceof Error ? error.message : "An unexpected error occurred.",
         variant: "destructive",
       })
     } finally {

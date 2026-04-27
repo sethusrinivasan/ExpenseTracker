@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { DbError } from "@/components/db-error"
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 
 interface Expense {
@@ -13,6 +14,7 @@ interface Expense {
 export function ExpenseSummary() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchExpenses()
@@ -20,52 +22,55 @@ export function ExpenseSummary() {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch("/api/expenses")
-      if (!response.ok) throw new Error("Failed to fetch expenses")
-      const data = await response.json()
-      setExpenses(data)
-    } catch (error) {
-      console.error("Error fetching expenses:", error)
+      const response = await fetch("/api/expenses?all=true")
+      const json = await response.json()
+      if (!response.ok) {
+        setError(json.error ?? "Failed to load summary.")
+        return
+      }
+      setExpenses(Array.isArray(json) ? json : [])
+    } catch {
+      setError("Could not reach the server. Check your network connection.")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const calculateTotal = () => {
-    return expenses.reduce((sum, expense) => sum + Number.parseFloat(expense.amount), 0)
-  }
+  const calculateTotal = () =>
+    expenses.reduce((sum, e) => sum + Number.parseFloat(e.amount), 0)
 
   const calculateMonthTotal = () => {
     const now = new Date()
-    const currentMonth = now.getMonth()
-    const currentYear = now.getFullYear()
-
     return expenses
-      .filter((expense) => {
-        const expenseDate = new Date(expense.date)
-        return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
+      .filter((e) => {
+        const d = new Date(e.date)
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
       })
-      .reduce((sum, expense) => sum + Number.parseFloat(expense.amount), 0)
+      .reduce((sum, e) => sum + Number.parseFloat(e.amount), 0)
   }
 
-  const calculateAverage = () => {
-    if (expenses.length === 0) return 0
-    return calculateTotal() / expenses.length
-  }
+  const calculateAverage = () =>
+    expenses.length === 0 ? 0 : calculateTotal() / expenses.length
 
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-3">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="border-border/50 shadow-xl shadow-black/5">
-            <CardHeader>
-              <Skeleton className="h-4 w-28" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-10 w-36" />
-            </CardContent>
+            <CardHeader><Skeleton className="h-4 w-28" /></CardHeader>
+            <CardContent><Skeleton className="h-10 w-36" /></CardContent>
           </Card>
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-3">
+          <DbError message={error} />
+        </div>
       </div>
     )
   }

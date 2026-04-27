@@ -5,6 +5,7 @@ import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseList } from "@/components/expense-list"
 import { ExpenseSummary } from "@/components/expense-summary"
 import { ExpenseAnalytics } from "@/components/expense-analytics"
+import { TestRunner } from "@/components/test-runner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet } from "lucide-react"
 
@@ -29,7 +30,7 @@ export default function Home() {
         </header>
 
         <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="grid w-full max-w-md grid-cols-3 h-12 p-1 bg-secondary/50 backdrop-blur-xl border border-border/50 shadow-sm">
+          <TabsList className="grid w-full max-w-md grid-cols-4 h-12 p-1 bg-secondary/50 backdrop-blur-xl border border-border/50 shadow-sm">
             <TabsTrigger
               value="overview"
               className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-md transition-all duration-300 ease-out"
@@ -48,6 +49,12 @@ export default function Home() {
             >
               Analytics
             </TabsTrigger>
+            <TabsTrigger
+              value="tests"
+              className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-md transition-all duration-300 ease-out"
+            >
+              Tests
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 animate-fade-in">
@@ -63,6 +70,10 @@ export default function Home() {
 
           <TabsContent value="analytics" className="animate-fade-in">
             <ExpenseAnalytics key={`analytics-${refreshKey}`} />
+          </TabsContent>
+
+          <TabsContent value="tests" className="animate-fade-in">
+            <TestRunner />
           </TabsContent>
         </Tabs>
       </div>
