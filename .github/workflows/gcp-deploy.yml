@@ -1,8 +1,9 @@
 name: Deploy to Google Cloud Run
-
-on:
-  push:
-    branches: [main]
+# Disabled — requires GCP_PROJECT_ID and GCP_SA_KEY secrets to be configured first
+# on:
+#   push:
+#     branches: [main]
+on: workflow_dispatch
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}

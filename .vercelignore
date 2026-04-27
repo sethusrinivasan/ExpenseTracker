@@ -1,0 +1,11 @@
+docker/
+docs/
+tests/
+scripts/
+*.md
+Makefile
+Dockerfile
+amplify.yml
+railway.json
+render.yaml
+staticwebapp.config.json

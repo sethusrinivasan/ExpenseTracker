@@ -1,8 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
-  "env": {
-    "DATABASE_URL": "@database_url"
-  }
+  "installCommand": "npm install --legacy-peer-deps"
 }

@@ -1,10 +1,9 @@
 name: Deploy to Azure Static Web Apps
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# Disabled — requires AZURE_STATIC_WEB_APPS_API_TOKEN secret to be configured first
+# on:
+#   push:
+#     branches: [main]
+on: workflow_dispatch
 
 jobs:
   deploy:
