@@ -29,20 +29,32 @@ export function assert(condition: boolean, message: string) {
 export const CATEGORIES = ["Food", "Transportation", "Entertainment", "Utilities", "Healthcare", "Shopping", "Education", "Other"]
 export const today = () => new Date().toISOString().split("T")[0]
 
+// Normalise API response — handles both plain array and paginated { data, ... }
+function toArray(json: unknown): unknown[] {
+  if (Array.isArray(json)) return json
+  if (json && typeof json === "object" && "data" in json && Array.isArray((json as { data: unknown }).data))
+    return (json as { data: unknown[] }).data
+  return []
+}
+
 export async function GET(request: NextRequest) {
   const base = new URL(request.url).origin
   const results: TestResult[] = []
   let createdId: number | null = null
 
+  // Use ?all=true so we always get a plain array back
+  const listUrl = `${base}/api/expenses?all=true`
+
   results.push(await runTest("Database is reachable", async () => {
-    const res = await fetch(`${base}/api/expenses`)
+    const res = await fetch(listUrl)
     assert(res.ok, `GET /api/expenses returned ${res.status}`)
   }))
 
   results.push(await runTest("GET /api/expenses returns an array", async () => {
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
-    assert(Array.isArray(data), `Expected array, got ${typeof data}`)
+    const res = await fetch(listUrl)
+    const json = await res.json()
+    const data = toArray(json)
+    assert(Array.isArray(data), `Expected array, got ${typeof json}`)
   }))
 
   results.push(await runTest("POST creates a new expense", async () => {
@@ -60,9 +72,11 @@ export async function GET(request: NextRequest) {
 
   results.push(await runTest("Created expense appears in GET list", async () => {
     assert(createdId !== null, "Previous test did not create an expense")
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
-    assert(data.find((e: { id: number }) => e.id === createdId), `id=${createdId} not found`)
+    const res = await fetch(listUrl)
+    const json = await res.json()
+    const data = toArray(json)
+    const found = data.find((e) => (e as { id: number }).id === createdId)
+    assert(found !== undefined, `id=${createdId} not found in list`)
   }))
 
   results.push(await runTest("POST returns 500 on missing amount", async () => {
@@ -75,39 +89,36 @@ export async function GET(request: NextRequest) {
   }))
 
   results.push(await runTest("Expense objects have required fields", async () => {
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
+    const res = await fetch(listUrl)
+    const data = toArray(await res.json())
     if (!data.length) return
     for (const field of ["id", "amount", "category", "date"])
-      assert(field in data[0], `Missing field: ${field}`)
+      assert(field in (data[0] as object), `Missing field: ${field}`)
   }))
 
   results.push(await runTest("Expense amounts are valid numbers", async () => {
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
-    for (const e of data) {
+    const data = toArray(await (await fetch(listUrl)).json())
+    for (const e of data as { amount: string }[]) {
       const n = parseFloat(e.amount)
       assert(!isNaN(n) && n >= 0, `Invalid amount: ${e.amount}`)
     }
   }))
 
   results.push(await runTest("Expense dates are valid ISO strings", async () => {
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
-    for (const e of data)
+    const data = toArray(await (await fetch(listUrl)).json())
+    for (const e of data as { date: string }[])
       assert(!isNaN(new Date(e.date).getTime()), `Invalid date: ${e.date}`)
   }))
 
   results.push(await runTest("Expense categories are valid", async () => {
     const valid = new Set(CATEGORIES)
-    const res = await fetch(`${base}/api/expenses`)
-    const data = await res.json()
-    for (const e of data)
+    const data = toArray(await (await fetch(listUrl)).json())
+    for (const e of data as { category: string }[])
       assert(valid.has(e.category), `Unknown category: ${e.category}`)
   }))
 
   results.push(await runTest("API returns application/json content-type", async () => {
-    const res = await fetch(`${base}/api/expenses`)
+    const res = await fetch(listUrl)
     const ct = res.headers.get("content-type") ?? ""
     assert(ct.includes("application/json"), `Wrong content-type: ${ct}`)
   }))

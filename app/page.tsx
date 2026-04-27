@@ -18,18 +18,18 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-primary/5">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <header className="mb-10 animate-fade-in">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 bg-gradient-to-br from-primary to-primary/80 rounded-2xl shadow-lg shadow-primary/20">
-              <Wallet className="w-7 h-7 text-primary-foreground" />
+      <div className="container mx-auto px-4 py-4 max-w-7xl">
+        <header className="mb-4 animate-fade-in">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg shadow-primary/20">
+              <Wallet className="w-5 h-5 text-primary-foreground" />
             </div>
-            <h1 className="text-5xl font-bold tracking-tight text-balance">Expenses</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
           </div>
-          <p className="text-muted-foreground text-lg ml-[4.25rem]">Track your spending with ease</p>
+          <p className="text-muted-foreground text-sm ml-[2.75rem]">Track your spending with ease</p>
         </header>
 
-        <Tabs defaultValue="overview" className="space-y-8">
+        <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="grid w-full max-w-md grid-cols-4 h-12 p-1 bg-secondary/50 backdrop-blur-xl border border-border/50 shadow-sm">
             <TabsTrigger
               value="overview"
@@ -57,7 +57,7 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-8 animate-fade-in">
+          <TabsContent value="overview" className="animate-fade-in">
             <ExpenseSummary key={`summary-${refreshKey}`} />
             <ExpenseList key={`list-${refreshKey}`} />
           </TabsContent>
